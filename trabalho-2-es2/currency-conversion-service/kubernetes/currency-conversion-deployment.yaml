@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-conversion-deployment
+spec:
+  replicas: 2  # Reduzido para 2 réplicas para economizar recursos
+  selector:
+    matchLabels:
+      app: currency-conversion
+  template:
+    metadata:
+      labels:
+        app: currency-conversion
+    spec:
+      containers:
+        - name: currency-conversion
+          image: gcr.io/trabalho-2-es2/currency-conversion-service:v1
+          ports:
+            - containerPort: 8080 # Porta do serviço currency-conversion
+          resources:
+            requests:
+              cpu: "100m"         # Solicitações reduzidas
+              memory: "128Mi"
+            limits:
+              cpu: "250m"         # Limites reduzidos
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Endereço do Spring Boot Actuator para verificar a saúde do serviço
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health # Verificação de liveness usando o Actuator
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3

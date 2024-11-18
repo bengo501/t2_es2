@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: naming-server-deployment
+spec:
+  replicas: 2 # Dobrado de 1 para 2
+  selector:
+    matchLabels:
+      app: naming-server
+  template:
+    metadata:
+      labels:
+        app: naming-server
+    spec:
+      containers:
+        - name: naming-server
+          image: gcr.io/trabalho-2-es2/naming-server:v1
+          ports:
+            - containerPort: 8761
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1024Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Endpoint de prontidão do Actuator
+              port: 8761
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health # Endpoint de verificação de liveness do Actuator
+              port: 8761
+            initialDelaySeconds: 15
+            periodSeconds: 10

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: currency-exchange-service
+spec:
+  selector:
+    app: currency-exchange
+  ports:
+    - protocol: TCP
+      port: 80          # Porta pela qual o serviço será exposto dentro do cluster
+      targetPort: 8000   # Porta no contêiner onde a aplicação está ouvindo
+  type: ClusterIP        # Expõe o serviço apenas dentro do cluster

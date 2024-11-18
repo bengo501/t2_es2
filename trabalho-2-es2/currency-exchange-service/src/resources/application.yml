@@ -1,0 +1,59 @@
+server:
+  port: 8000  # Porta onde o serviço será executado
+
+eureka:
+  client:
+    register-with-eureka: true       # Registra o serviço no Eureka
+    fetch-registry: true             # Ativa o registro de outros serviços no Eureka
+    service-url:
+      defaultZone: http://naming-server:8761/eureka  # URL do servidor de nomeação (Naming Server)
+
+spring:
+  datasource:
+    url: jdbc:mysql://34.95.236.246:3306/exchange_db  # Substitua pelo IP do Cloud SQL e nome do banco
+    username: user_exchange                           # Nome do usuário do Cloud SQL
+    password: password                                # Senha do usuário configurado no Cloud SQL
+    driver-class-name: com.mysql.cj.jdbc.Driver       # Driver JDBC do MySQL
+
+  jpa:
+    hibernate:
+      ddl-auto: update                                # Atualiza automaticamente o esquema do banco de dados
+    show-sql: true                                    # Exibe as consultas SQL no console para debug
+    database-platform: org.hibernate.dialect.MySQLDialect  # Dialeto do banco de dados MySQL
+
+rabbitmq:
+  host: localhost                                     # Endereço do RabbitMQ (ajuste se for um servidor remoto)
+  port: 5672                                          # Porta padrão do RabbitMQ
+  username: guest                                     # Usuário do RabbitMQ
+  password: guest                                     # Senha do RabbitMQ
+  template:
+    retry:
+      enabled: true                                   # Ativa tentativas de reconexão
+      max-attempts: 3                                 # Número máximo de tentativas
+      initial-interval: 500ms                         # Intervalo inicial entre tentativas
+      multiplier: 2.0                                 # Multiplicador do intervalo entre tentativas
+      max-interval: 2000ms                            # Intervalo máximo entre tentativas
+
+# Configuração do Circuit Breaker com Resilience4j
+resilience4j.circuitbreaker:
+  instances:
+    currencyExchangeService:
+      slidingWindowSize: 10                           # Número de chamadas a serem observadas
+      minimumNumberOfCalls: 5                         # Chamadas mínimas para ativar o Circuit Breaker
+      failureRateThreshold: 50                        # Percentual de falhas para abrir o Circuit Breaker
+      waitDurationInOpenState: 10s                    # Tempo de espera no estado aberto
+      permittedNumberOfCallsInHalfOpenState: 3        # Chamadas permitidas no estado meio aberto
+      slowCallRateThreshold: 100                      # Percentual de chamadas lentas que aciona o Circuit Breaker
+      slowCallDurationThreshold: 2s                   # Duração mínima para considerar uma chamada lenta
+      automatic-transition-from-open-to-half-open-enabled: true  # Transição automática do estado aberto para meio aberto
+  circuitBreakerAspectOrder: 1                        # Prioridade do Circuit Breaker para execução de logs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: resilience4j*, health, info, env, metrics # Exposição dos endpoints de monitoramento e saúde
+
+  endpoint:
+    health:
+      show-details: always # Mostra detalhes completos sobre o estado de saúde

@@ -1,0 +1,40 @@
+server:
+  port: 8765  # Porta onde o API Gateway será executado
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://naming-server:8761/eureka  # URL do servidor de nomeação (Naming Server)
+
+zuul:
+  routes:
+    currency-exchange:
+      path: /currency-exchange/**         # Caminho de roteamento para o serviço de câmbio
+      service-id: currency-exchange       # Nome do serviço de câmbio registrado no Eureka
+    currency-conversion:
+      path: /currency-conversion/**       # Caminho de roteamento para o serviço de conversão
+      service-id: currency-conversion     # Nome do serviço de conversão registrado no Eureka
+  prefix: /api                            # Prefixo de roteamento para as APIs
+  sensitive-headers: COOKIE, Set-Cookie, Authorization  # Cabeçalhos sensíveis que não serão transmitidos
+
+# Configuração do Circuit Breaker com Resilience4j
+resilience4j.circuitbreaker:
+  instances:
+    apiGatewayService:
+      slidingWindowSize: 10                           # Número de chamadas a serem observadas
+      minimumNumberOfCalls: 5                         # Chamadas mínimas para ativar o Circuit Breaker
+      failureRateThreshold: 50                        # Percentual de falhas para abrir o Circuit Breaker
+      waitDurationInOpenState: 10s                    # Tempo de espera no estado aberto
+      permittedNumberOfCallsInHalfOpenState: 3        # Chamadas permitidas no estado "meio aberto"
+      slowCallRateThreshold: 100                      # Percentual de chamadas lentas para acionar o Circuit Breaker
+      slowCallDurationThreshold: 2s                   # Duração mínima para considerar uma chamada lenta
+      automatic-transition-from-open-to-half-open-enabled: true  # Transição automática do estado aberto para meio aberto
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: resilience4j*, health, info, env, metrics  # Exposição dos endpoints de gerenciamento e Resilience4j
+  endpoint:
+    health:
+      show-details: always  # Mostra detalhes completos sobre o estado de saúde

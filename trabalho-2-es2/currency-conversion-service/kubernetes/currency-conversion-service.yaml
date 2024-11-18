@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: currency-conversion-service
+spec:
+  selector:
+    app: currency-conversion
+  ports:
+    - protocol: TCP
+      port: 80          # Porta pela qual o serviço será exposto internamente
+      targetPort: 8080   # Porta em que o contêiner está ouvindo
+  type: ClusterIP        # ClusterIP é o padrão, expõe o serviço apenas internamente

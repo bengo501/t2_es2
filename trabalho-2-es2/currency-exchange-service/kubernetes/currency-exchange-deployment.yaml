@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-exchange-deployment
+spec:
+  replicas: 1  # Reduzido para 1 réplica para economizar recursos
+  selector:
+    matchLabels:
+      app: currency-exchange
+  template:
+    metadata:
+      labels:
+        app: currency-exchange
+    spec:
+      containers:
+        - name: currency-exchange
+          image: gcr.io/trabalho-2-es2/currency-exchange-service:v1
+          ports:
+            - containerPort: 8000 # Atualizado para corresponder ao Dockerfile
+          resources:
+            requests:
+              cpu: "50m"        # Redução adicional para facilitar o agendamento
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health # Endpoint do Spring Boot Actuator para verificação de prontidão
+              port: 8000            # Atualizado para corresponder ao Dockerfile
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health # Verificação de liveness usando o Actuator
+              port: 8000            # Atualizado para corresponder ao Dockerfile
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3

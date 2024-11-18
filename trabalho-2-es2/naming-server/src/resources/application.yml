@@ -1,0 +1,20 @@
+server:
+  port: 8761  # Porta onde o naming server (Eureka) será executado
+
+eureka:
+  client:
+    register-with-eureka: false  # O naming server não precisa se registrar em si mesmo
+    fetch-registry: false        # Ele também não precisa buscar o registro de outros serviços
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, env, metrics, beans  # Exposição dos endpoints de gerenciamento para monitoramento
+  endpoint:
+    health:
+      show-details: always  # Mostra detalhes completos sobre o estado de saúde do sistema
+
+spring:
+  application:
+    name: naming-server  # Nome da aplicação para identificação no ambiente de microserviços

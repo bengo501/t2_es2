@@ -1,0 +1,15 @@
+
+spring:
+  rabbitmq:
+    host: localhost # or Kubernetes RabbitMQ service name
+    port: 5672
+    username: guest
+    password: guest
+
+# Define queue, exchange, and routing key for message exchange
+queue:
+  name: currencyQueue
+exchange:
+  name: currencyExchange
+routing-key:
+  name: currencyRoutingKey
